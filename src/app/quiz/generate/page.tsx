@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { CheckCircle2, XCircle, ArrowLeft } from 'lucide-react'
+import { CheckCircle2, XCircle, ArrowLeft, Home } from 'lucide-react'
 import Link from 'next/link'
 
 interface QuizData {
@@ -165,10 +165,10 @@ export default function GenerateQuizPage() {
     <main className="flex min-h-screen flex-col items-center p-4 sm:p-8 md:p-16 lg:p-24">
       <div className="w-full max-w-5xl">
         <div className="flex items-center justify-between mb-8">
-          <Link href="/quiz/select">
-            <Button variant="ghost" className="text-gray-600 hover:text-gray-900">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              돌아가기
+          <Link href="/">
+            <Button variant="ghost" className="text-gray-600 hover:text-gray-900 group">
+              <Home className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
+              <span className="transition-colors">홈으로</span>
             </Button>
           </Link>
         </div>
