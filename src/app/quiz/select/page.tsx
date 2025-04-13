@@ -1,116 +1,137 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { useState } from 'react'
+import { CSVData } from '@/utils/csv-parser'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { ArrowLeft, Check, Sparkles } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { Suspense } from 'react'
 
-function SelectForm() {
-  const router = useRouter()
+export default function QuizSelectPage() {
   const searchParams = useSearchParams()
+  const [csvData, setCsvData] = useState<CSVData | null>(null)
   const [selectedColumns, setSelectedColumns] = useState<string[]>([])
-  const [error, setError] = useState<string | null>(null)
 
-  const data = searchParams.get('data')
-  let parsedData
-  try {
-    parsedData = data ? JSON.parse(decodeURIComponent(data)) : null
-  } catch {
-    setError('데이터를 불러오는 중 오류가 발생했습니다')
-  }
-
-  if (error) {
-    return (
-      <div className="text-red-500 text-center">
-        {error}
-      </div>
-    )
-  }
-
-  if (!parsedData) {
-    return (
-      <div className="text-gray-500 text-center">
-        데이터를 불러오는 중...
-      </div>
-    )
-  }
+  useEffect(() => {
+    const data = searchParams.get('data')
+    if (data) {
+      try {
+        const decodedData = JSON.parse(decodeURIComponent(data))
+        setCsvData(decodedData)
+      } catch (err) {
+        console.error('Error parsing CSV data:', err)
+      }
+    }
+  }, [searchParams])
 
   const handleColumnToggle = (column: string) => {
-    setSelectedColumns(prev =>
-      prev.includes(column)
-        ? prev.filter(col => col !== column)
-        : [...prev, column]
+    setSelectedColumns(prev => {
+      if (prev.includes(column)) {
+        return prev.filter(col => col !== column)
+      } else {
+        return [...prev, column]
+      }
+    })
+  }
+
+  const handleGenerateQuiz = () => {
+    if (selectedColumns.length === 0) return
+
+    const encodedData = encodeURIComponent(JSON.stringify(csvData))
+    const encodedColumns = encodeURIComponent(JSON.stringify(selectedColumns))
+    window.location.href = `/quiz/generate?data=${encodedData}&columns=${encodedColumns}`
+  }
+
+  if (!csvData) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-gray-500">데이터를 불러오는 중...</p>
+      </div>
     )
   }
 
-  const handleNext = () => {
-    if (selectedColumns.length === 0) {
-      setError('최소 하나의 컬럼을 선택해주세요')
-      return
-    }
-
-    const encodedColumns = encodeURIComponent(JSON.stringify(selectedColumns))
-    router.push(`/quiz/generate?data=${data}&columns=${encodedColumns}`)
-  }
-
-  return (
-    <div className="w-full max-w-5xl">
-      <div className="flex items-center justify-between mb-8">
-        <Link href="/">
-          <Button variant="ghost" className="text-gray-600 hover:text-gray-900 group">
-            <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
-            <span className="transition-colors">홈으로</span>
-          </Button>
-        </Link>
-      </div>
-
-      <div className="text-center mb-12">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
-          빈칸으로 만들 컬럼 선택
-        </h1>
-        <p className="text-lg sm:text-xl text-gray-600 mb-6">
-          빈칸으로 만들고 싶은 컬럼을 선택해주세요
-        </p>
-      </div>
-
-      <div className="space-y-6">
-        {parsedData.headers.map((header: string) => (
-          <div key={header} className="flex items-center space-x-2">
-            <Checkbox
-              id={header}
-              checked={selectedColumns.includes(header)}
-              onCheckedChange={() => handleColumnToggle(header)}
-            />
-            <label
-              htmlFor={header}
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              {header}
-            </label>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-8 flex justify-end">
-        <Button onClick={handleNext} className="space-x-2">
-          <span>다음</span>
-          <ArrowRight className="h-4 w-4" />
-        </Button>
-      </div>
-    </div>
-  )
-}
-
-export default function SelectPage() {
   return (
     <main className="flex min-h-screen flex-col items-center p-4 sm:p-8 md:p-16 lg:p-24">
-      <Suspense fallback={<div>Loading...</div>}>
-        <SelectForm />
-      </Suspense>
+      <div className="w-full max-w-5xl">
+        <div className="flex items-center justify-between mb-8">
+          <Link href="/upload">
+            <Button variant="ghost" className="text-gray-600 hover:text-gray-900 group">
+              <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
+              <span className="transition-colors">이전으로 돌아가기</span>
+            </Button>
+          </Link>
+        </div>
+
+        <div className="text-center mb-12">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
+            컬럼 선택
+          </h1>
+          <p className="text-lg sm:text-xl text-gray-600 mb-6">
+            빈칸으로 만들고 싶은 컬럼을 선택해주세요
+          </p>
+        </div>
+
+        <div className="max-w-2xl mx-auto space-y-12">
+          <Card className="hover:shadow-lg transition-shadow duration-300">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-6 w-6 text-pink-500" />
+                <CardTitle>컬럼 선택</CardTitle>
+              </div>
+              <CardDescription>
+                빈칸으로 만들고 싶은 컬럼을 선택하세요
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {csvData.headers.map((header, index) => (
+                  <Button
+                    key={index}
+                    variant={selectedColumns.includes(header) ? 'default' : 'outline'}
+                    className="flex items-center gap-2"
+                    onClick={() => handleColumnToggle(header)}
+                  >
+                    {selectedColumns.includes(header) && <Check className="h-4 w-4" />}
+                    {header}
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-8 text-center">
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800">퀴즈 생성 규칙</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="flex flex-col items-center">
+                <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center mb-4">
+                  <span className="text-xl font-bold text-pink-500">1</span>
+                </div>
+                <h3 className="font-medium mb-2">컬럼 선택</h3>
+                <p className="text-gray-600 text-sm">빈칸으로 만들고 싶은 컬럼을 선택하세요</p>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mb-4">
+                  <span className="text-xl font-bold text-purple-500">2</span>
+                </div>
+                <h3 className="font-medium mb-2">퀴즈 생성</h3>
+                <p className="text-gray-600 text-sm">선택한 컬럼 중 하나가 랜덤하게 빈칸으로 생성됩니다</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-center">
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white"
+              onClick={handleGenerateQuiz}
+              disabled={selectedColumns.length === 0}
+            >
+              퀴즈 생성하기
+            </Button>
+          </div>
+        </div>
+      </div>
     </main>
   )
 } 
