@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { CSVData } from '@/utils/csv-parser'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowLeft, Check, Sparkles } from 'lucide-react'
+import { Check, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 
 function QuizSelectContent() {
@@ -14,16 +14,17 @@ function QuizSelectContent() {
   const [selectedColumns, setSelectedColumns] = useState<string[]>([])
 
   useEffect(() => {
-    const data = searchParams.get('data')
-    if (data) {
-      try {
-        const decodedData = JSON.parse(decodeURIComponent(data))
-        setCsvData(decodedData)
-      } catch (err) {
-        console.error('Error parsing CSV data:', err)
+    try {
+      // localStorage에서 데이터 가져오기
+      const data = localStorage.getItem('csvData')
+      if (data) {
+        const parsedData = JSON.parse(data)
+        setCsvData(parsedData)
       }
+    } catch (err) {
+      console.error('Error parsing CSV data:', err)
     }
-  }, [searchParams])
+  }, [])
 
   const handleColumnToggle = (column: string) => {
     setSelectedColumns(prev => {
@@ -38,9 +39,13 @@ function QuizSelectContent() {
   const handleGenerateQuiz = () => {
     if (selectedColumns.length === 0) return
 
-    const encodedData = encodeURIComponent(JSON.stringify(csvData))
-    const encodedColumns = encodeURIComponent(JSON.stringify(selectedColumns))
-    window.location.href = `/quiz/generate?data=${encodedData}&columns=${encodedColumns}`
+    try {
+      // 선택된 컬럼을 localStorage에 저장
+      localStorage.setItem('selectedColumns', JSON.stringify(selectedColumns))
+      window.location.href = '/quiz/generate'
+    } catch {
+      console.error('데이터 처리 중 오류가 발생했습니다')
+    }
   }
 
   if (!csvData) {
@@ -54,14 +59,6 @@ function QuizSelectContent() {
   return (
     <main className="flex min-h-screen flex-col items-center p-4 sm:p-8 md:p-16 lg:p-24">
       <div className="w-full max-w-5xl">
-        <div className="flex items-center justify-between mb-8">
-          <Link href="/upload">
-            <Button variant="ghost" className="text-gray-600 hover:text-gray-900 group">
-              <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
-              <span className="transition-colors">이전으로 돌아가기</span>
-            </Button>
-          </Link>
-        </div>
 
         <div className="text-center mb-12">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
@@ -120,7 +117,15 @@ function QuizSelectContent() {
             </div>
           </div>
 
-          <div className="flex justify-center">
+          <div className="flex justify-center gap-2">
+            <Link href="/">
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white"
+              >
+                이전
+              </Button>
+            </Link>
             <Button
               size="lg"
               className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white"

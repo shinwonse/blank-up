@@ -45,13 +45,14 @@ function QuizForm() {
   const [isSubmitted, setIsSubmitted] = useState(false)
 
   useEffect(() => {
-    const data = searchParams.get('data')
-    const columns = searchParams.get('columns')
-    
-    if (data && columns) {
-      try {
-        const parsedData = JSON.parse(decodeURIComponent(data))
-        const parsedColumns = JSON.parse(decodeURIComponent(columns))
+    try {
+      // localStorage에서 데이터 가져오기
+      const data = localStorage.getItem('csvData')
+      const columns = localStorage.getItem('selectedColumns')
+      
+      if (data && columns) {
+        const parsedData = JSON.parse(data)
+        const parsedColumns = JSON.parse(columns)
         setCSVData(parsedData)
         
         // 퀴즈 데이터 생성
@@ -72,11 +73,11 @@ function QuizForm() {
         })
         
         setQuizData(newQuizData)
-      } catch {
-        setError('데이터를 불러오는 중 오류가 발생했습니다')
       }
+    } catch (err) {
+      setError('데이터를 불러오는 중 오류가 발생했습니다')
     }
-  }, [searchParams])
+  }, [])
 
   const handleAnswerChange = (rowIndex: number, cellIndex: number, value: string) => {
     setQuizData(prev => {

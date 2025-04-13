@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { CSVUploader } from '@/components/csv-uploader'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowLeft, FileSpreadsheet, Upload, ArrowRight, CheckCircle2 } from 'lucide-react'
+import { FileSpreadsheet, Upload, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 import { CSVData } from '@/utils/csv-parser'
 
@@ -23,8 +23,9 @@ export default function UploadPage() {
     if (!csvData) return
 
     try {
-      const encodedData = encodeURIComponent(JSON.stringify(csvData))
-      router.push(`/quiz/select?data=${encodedData}`)
+      // localStorage에 데이터 저장
+      localStorage.setItem('csvData', JSON.stringify(csvData))
+      router.push('/quiz/select')
     } catch {
       console.error('데이터 처리 중 오류가 발생했습니다')
     }
@@ -33,15 +34,6 @@ export default function UploadPage() {
   return (
     <main className="flex min-h-screen flex-col items-center p-4 sm:p-8 md:p-16 lg:p-24">
       <div className="w-full max-w-5xl">
-        <div className="flex items-center justify-between mb-8">
-          <Link href="/">
-            <Button variant="ghost" className="text-gray-600 hover:text-gray-900 group">
-              <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
-              <span className="transition-colors">홈으로 돌아가기</span>
-            </Button>
-          </Link>
-        </div>
-
         <div className="text-center mb-12">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
             CSV 파일 업로드
@@ -99,7 +91,15 @@ export default function UploadPage() {
             </div>
           </div>
 
-          <div className="flex justify-center">
+          <div className="flex justify-center gap-2">
+            <Link href="/">
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white space-x-2"
+              >
+                <span>이전</span>
+              </Button>
+            </Link>
             <Button
               size="lg"
               className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white space-x-2"
@@ -107,7 +107,6 @@ export default function UploadPage() {
               disabled={!csvData}
             >
               <span>다음</span>
-              <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
