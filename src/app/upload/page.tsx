@@ -7,14 +7,14 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, FileSpreadsheet, Upload, ArrowRight, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
+import { CSVData } from '@/utils/csv-parser'
 
 export default function UploadPage() {
   const router = useRouter()
-  const [error, setError] = useState<string | null>(null)
-  const [csvData, setCsvData] = useState<any>(null)
+  const [csvData, setCsvData] = useState<CSVData | null>(null)
   const [fileName, setFileName] = useState<string | null>(null)
 
-  const handleFileUpload = (data: any, file: File) => {
+  const handleFileUpload = (data: CSVData, file: File) => {
     setCsvData(data)
     setFileName(file.name)
   }
@@ -25,8 +25,8 @@ export default function UploadPage() {
     try {
       const encodedData = encodeURIComponent(JSON.stringify(csvData))
       router.push(`/quiz/select?data=${encodedData}`)
-    } catch (err) {
-      setError('데이터 처리 중 오류가 발생했습니다')
+    } catch {
+      console.error('데이터 처리 중 오류가 발생했습니다')
     }
   }
 

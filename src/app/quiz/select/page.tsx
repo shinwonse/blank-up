@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { CSVData } from '@/utils/csv-parser'
 import { Button } from '@/components/ui/button'
@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ArrowLeft, Check, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 
-export default function QuizSelectPage() {
+function QuizSelectContent() {
   const searchParams = useSearchParams()
   const [csvData, setCsvData] = useState<CSVData | null>(null)
   const [selectedColumns, setSelectedColumns] = useState<string[]>([])
@@ -133,5 +133,17 @@ export default function QuizSelectPage() {
         </div>
       </div>
     </main>
+  )
+}
+
+export default function QuizSelectPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-gray-500">로딩 중...</p>
+      </div>
+    }>
+      <QuizSelectContent />
+    </Suspense>
   )
 } 

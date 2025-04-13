@@ -2,7 +2,6 @@
 
 import { useCallback, useState } from 'react'
 import { CSVData } from '@/utils/csv-parser'
-import { Button } from '@/components/ui/button'
 import { Upload } from 'lucide-react'
 
 interface CSVUploaderProps {
@@ -27,7 +26,7 @@ export function CSVUploader({ onUpload }: CSVUploaderProps) {
 
       onUpload({ headers, rows: data }, file)
       setError(null)
-    } catch (err) {
+    } catch {
       setError('파일을 읽는 중 오류가 발생했습니다')
     }
   }, [onUpload])
