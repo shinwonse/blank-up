@@ -1,7 +1,6 @@
 'use client'
 
 import { Suspense, useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
 import { CSVData } from '@/utils/csv-parser'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -9,7 +8,6 @@ import { Check, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 
 function QuizSelectContent() {
-  const searchParams = useSearchParams()
   const [csvData, setCsvData] = useState<CSVData | null>(null)
   const [selectedColumns, setSelectedColumns] = useState<string[]>([])
 

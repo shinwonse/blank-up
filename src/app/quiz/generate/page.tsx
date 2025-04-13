@@ -1,7 +1,6 @@
 'use client'
 
 import { CSVData } from '@/utils/csv-parser'
-import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -37,7 +36,6 @@ interface QuizResult {
 }
 
 function QuizForm() {
-  const searchParams = useSearchParams()
   const [csvData, setCSVData] = useState<CSVData | null>(null)
   const [quizData, setQuizData] = useState<QuizData[][]>([])
   const [error, setError] = useState<string | null>(null)
@@ -74,7 +72,7 @@ function QuizForm() {
         
         setQuizData(newQuizData)
       }
-    } catch (err) {
+    } catch {
       setError('데이터를 불러오는 중 오류가 발생했습니다')
     }
   }, [])
