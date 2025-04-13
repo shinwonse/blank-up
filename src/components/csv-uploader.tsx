@@ -1,19 +1,19 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, ChangeEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { FileSpreadsheet, Upload, X } from 'lucide-react'
-import { parseCSV } from '@/utils/csv-parser'
+import { parseCSV, CSVData } from '@/utils/csv-parser'
 
 interface CSVUploaderProps {
-  onUpload: (data: any) => void
+  onUpload: (data: CSVData) => void
 }
 
 export function CSVUploader({ onUpload }: CSVUploaderProps) {
   const [isDragging, setIsDragging] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [fileName, setFileName] = useState<string | null>(null)
-  const [csvData, setCSVData] = useState<any>(null)
+  const [csvData, setCSVData] = useState<CSVData | null>(null)
 
   const handleFile = useCallback(async (file: File) => {
     try {
@@ -58,12 +58,21 @@ export function CSVUploader({ onUpload }: CSVUploaderProps) {
     }
   }, [handleFile])
 
-  const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      handleFile(file)
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      const text = e.target?.result as string
+      const lines = text.split('\n')
+      const headers = lines[0].split(',')
+      const rows = lines.slice(1).map(line => line.split(','))
+      
+      onUpload({ headers, rows })
     }
-  }, [handleFile])
+    reader.readAsText(file)
+  }
 
   const handleNext = useCallback(() => {
     if (csvData) {
@@ -103,7 +112,7 @@ export function CSVUploader({ onUpload }: CSVUploaderProps) {
           <input
             type="file"
             accept=".csv"
-            onChange={handleFileInput}
+            onChange={handleFileChange}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           />
         </div>
