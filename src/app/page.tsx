@@ -14,7 +14,7 @@ export default function Home() {
             Blank Up
           </h1>
           <p className="text-lg sm:text-xl text-gray-600 mb-6">
-            CSV 파일로 쉽고 빠르게 빈칸 퀴즈를 만들어보세요!
+            쉽고 빠르게 빈칸 퀴즈를 만들어보세요!
           </p>
         </div>
 
